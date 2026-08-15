@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eduonline Video Downloader</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main id="app" aria-live="polite">
+      <header>
+        <h1>Lesson video</h1>
+        <p id="status">Loading…</p>
+      </header>
+      <section id="media" hidden>
+        <div id="video-field" hidden>
+          <label for="video">Video</label>
+          <select id="video"></select>
+        </div>
+        <img id="poster" alt="" hidden>
+        <h2 id="title"></h2>
+        <p id="duration"></p>
+        <label for="quality">Quality</label>
+        <select id="quality"></select>
+        <button id="download" type="button" disabled>Download</button>
+      </section>
+      <section id="progress" hidden>
+        <progress id="progress-bar" max="100" value="0"></progress>
+        <span id="progress-label"></span>
+      </section>
+      <p id="error" role="alert" hidden></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

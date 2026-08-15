@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Example lesson</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.accel_player = new AccelPlayer({
+          videoId: "ExamplePlayerId123456",
+          stream: {
+            durationInSec: 2092,
+            state: "completed",
+          },
+          url: 'https://kinescope.io/ExampleStreamId123456/master.m3u8',
+          title: "Example lesson",
+          showTitle: true,
+          autoplay: false,
+          muted: true,
+          startSec: null,
+          ui: {
+            enabled: true,
+            showControls: true,
+            poster: "https://cdn.app.axl.tech/example/images/poster.png",
+            locale: "en-US",
+          },
+        });
+      });
+    </script>
+  </head>
+  <body></body>
+</html>

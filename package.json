@@ -1,0 +1,14 @@
+{
+  "name": "eduonline-video-downloader",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension and native host for downloading authorized eduonline.io lesson videos.",
+  "scripts": {
+    "test": "npm run test:python && npm run test:js",
+    "test:python": "python3 -m unittest discover -s tests/python -v",
+    "test:js": "node --test tests/js/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

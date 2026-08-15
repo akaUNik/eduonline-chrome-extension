@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "nativeHost": "io.eduonline.ytdlp",
+  "maxMessageBytes": 1048576,
+  "probeResult": {
+    "videos": "ordered array of independently tokenized video metadata"
+  },
+  "actions": [
+    "ping",
+    "probe",
+    "download",
+    "status"
+  ],
+  "events": [
+    "result",
+    "accepted",
+    "progress",
+    "complete",
+    "error"
+  ],
+  "errorCodes": [
+    "INVALID_MESSAGE",
+    "UNSUPPORTED_VERSION",
+    "UNSUPPORTED_ACTION",
+    "UNSUPPORTED_PAGE",
+    "INVALID_PLAYER_URL",
+    "INVALID_PROVIDER_CONFIG",
+    "INVALID_MANIFEST_URL",
+    "NO_FORMATS",
+    "AUTHORIZATION_REQUIRED",
+    "DRM_UNSUPPORTED",
+    "NATIVE_HOST_UNAVAILABLE",
+    "YTDLP_NOT_FOUND",
+    "FFMPEG_NOT_FOUND",
+    "NETWORK_ERROR",
+    "STORAGE_ERROR",
+    "DOWNLOAD_TIMEOUT",
+    "DOWNLOAD_FAILED",
+    "BUSY",
+    "PROBE_EXPIRED",
+    "INVALID_FORMAT"
+  ]
+}

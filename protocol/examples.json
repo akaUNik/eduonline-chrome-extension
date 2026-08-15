@@ -1,0 +1,78 @@
+{
+  "probeRequest": {
+    "version": 2,
+    "requestId": "request-1",
+    "action": "probe",
+    "payload": {
+      "lessonUrl": "https://school.eduonline.io/learn/ExampleLessonId/theory",
+      "candidates": [
+        "https://v.accelsite.io/v/ExamplePlayerId123456?showTitle=true"
+      ]
+    }
+  },
+  "probeResult": {
+    "version": 2,
+    "requestId": "request-1",
+    "event": "result",
+    "payload": {
+      "videos": [
+        {
+          "videoId": "ExampleStreamId123456",
+          "probeToken": "opaque-probe-token-one",
+          "title": "Example lesson video one",
+          "poster": null,
+          "duration": 120,
+          "formats": [
+            {
+              "choiceId": "best",
+              "label": "Best (720p)",
+              "height": 720,
+              "audioOnly": false
+            }
+          ]
+        },
+        {
+          "videoId": "OtherStreamId123456",
+          "probeToken": "opaque-probe-token-two",
+          "title": "Example lesson video two",
+          "poster": null,
+          "duration": 180,
+          "formats": [
+            {
+              "choiceId": "audio-only",
+              "label": "Audio only (MP3)",
+              "height": null,
+              "audioOnly": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "downloadRequest": {
+    "version": 2,
+    "requestId": "request-2",
+    "action": "download",
+    "payload": {
+      "probeToken": "opaque-probe-token",
+      "choiceId": "video-720"
+    }
+  },
+  "progressEvent": {
+    "version": 2,
+    "requestId": "request-2",
+    "event": "progress",
+    "payload": {
+      "percent": 42.5
+    }
+  },
+  "errorEvent": {
+    "version": 2,
+    "requestId": "request-2",
+    "event": "error",
+    "error": {
+      "code": "DOWNLOAD_FAILED",
+      "message": "The local downloader could not complete the request."
+    }
+  }
+}

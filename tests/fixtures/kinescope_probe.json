@@ -1,0 +1,49 @@
+{
+  "extractor": "generic",
+  "extractor_key": "Generic",
+  "id": "master",
+  "title": "master",
+  "duration": 2092,
+  "formats": [
+    {
+      "format_id": "audio_mp4a-English",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "width": null,
+      "height": null,
+      "vcodec": "none",
+      "acodec": "mp4a.40.2",
+      "has_drm": false
+    },
+    {
+      "format_id": "517",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "width": 640,
+      "height": 360,
+      "vcodec": "avc1.4D401E",
+      "acodec": "none",
+      "has_drm": false
+    },
+    {
+      "format_id": "727",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "width": 854,
+      "height": 480,
+      "vcodec": "avc1.4D401F",
+      "acodec": "none",
+      "has_drm": false
+    },
+    {
+      "format_id": "1357",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "width": 1280,
+      "height": 720,
+      "vcodec": "avc1.4D401F",
+      "acodec": "none",
+      "has_drm": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "src": "https://v.accelsite.io/v/ExamplePlayerOne123?showTitle=true"
+  },
+  {
+    "src": "https://v.accelsite.io/v/ExamplePlayerTwo456?showControls=true"
+  },
+  {
+    "src": "https://v.accelsite.io/v/ExamplePlayerOne123?showTitle=true"
+  },
+  {
+    "src": "https://untrusted.example/v/ExamplePlayerThree789"
+  }
+]

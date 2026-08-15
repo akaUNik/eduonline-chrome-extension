@@ -1,0 +1,61 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 340px;
+}
+
+main {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 18px;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+#media {
+  display: grid;
+  gap: 8px;
+}
+
+#video-field {
+  display: grid;
+  gap: 6px;
+}
+
+#poster {
+  border-radius: 8px;
+  max-height: 180px;
+  object-fit: cover;
+  width: 100%;
+}
+
+button,
+select {
+  box-sizing: border-box;
+  min-height: 36px;
+  width: 100%;
+}
+
+#progress-bar {
+  width: 100%;
+}
+
+#error {
+  color: #c62828;
+}
