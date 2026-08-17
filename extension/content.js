@@ -23,7 +23,7 @@
       const url = new URL(rawUrl);
       if (url.protocol !== 'https:' || url.hostname !== 'v.accelsite.io') return null;
       if (!PLAYER_PATH.test(url.pathname) || url.hash) return null;
-      const allowed = new Set(['showTitle', 'showControls', 'muted']);
+      const allowed = new Set(['showTitle', 'showControls', 'muted', 'autoplay']);
       for (const [key, value] of url.searchParams) {
         if (!allowed.has(key) || !['true', 'false'].includes(value)) return null;
       }
