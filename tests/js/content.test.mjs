@@ -37,7 +37,9 @@ test("content script registers a discovery listener with mocked Chrome APIs", as
 
 test("content script accepts bounded AccelSite iframe candidates only", async () => {
   const frames = [
-    { src: "https://v.accelsite.io/v/ExamplePlayerId123456?showTitle=true" },
+    {
+      src: "https://v.accelsite.io/v/ExamplePlayerId123456?showTitle=true&autoplay=true",
+    },
     { src: "https://evil.example/v/ExamplePlayerId123456" },
     { src: "http://v.accelsite.io/v/ExamplePlayerId123456" },
     { src: "https://v.accelsite.io/v/ExamplePlayerId123456?token=secret" },

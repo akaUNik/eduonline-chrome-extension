@@ -66,6 +66,78 @@ Return to `chrome://extensions`, click **Reload** on the extension card, and rel
 
 If the cloned directory is moved later, rerun the `install` and `diagnose` commands from its new location. Registration is idempotent and refreshes the absolute launcher path.
 
+## Package and distribute the extension
+
+The packed Chrome extension contains only the files under `extension/`. It does
+not contain the Python native host, `yt-dlp`, or `ffmpeg`. Every recipient must
+therefore keep a copy of this repository, install the native dependencies, and
+register the native host for the installed extension ID as described above.
+
+### Create the package
+
+Before publishing a new release, increment `version` in
+`extension/manifest.json` and run the test suite:
+
+```sh
+npm test
+```
+
+To create the first package in Chrome:
+
+1. Open `chrome://extensions` and enable **Developer mode**.
+2. Click **Pack extension**.
+3. Set **Extension root directory** to this repository's `extension` directory.
+4. Leave **Private key file** empty for the first package.
+5. Chrome creates `extension.crx` and `extension.pem` next to the `extension`
+   directory.
+
+The same package can be created from Terminal on macOS:
+
+```sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --pack-extension="$PWD/extension"
+```
+
+Keep `extension.pem` secret, outside public release archives, and never commit
+it. The private key determines the extension ID. Losing or replacing it changes
+the ID, breaks updates, and requires every installation to register the native
+host again for the new ID.
+
+For every update, increment the manifest version and pack with the original key:
+
+```sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --pack-extension="$PWD/extension" \
+  --pack-extension-key="$PWD/extension.pem"
+```
+
+After installing the package, copy its ID from `chrome://extensions`, then run:
+
+```sh
+python3 scripts/setup_host.py install YOUR_PACKED_EXTENSION_ID
+python3 scripts/setup_host.py diagnose
+```
+
+### Choose a distribution channel
+
+- **Chrome Web Store** is the supported option for ordinary macOS and Windows
+  users. Publish the extension package through the Store, and distribute the
+  repository or a separate native-host installer alongside it.
+- **Managed organization** deployments on macOS, Windows, or Linux can
+  self-host the `.crx` and install it with Chrome enterprise policies. For
+  automatic updates, host an update manifest, add its HTTPS `update_url` to
+  `manifest.json`, and always sign updates with the same private key.
+- **Linux only** supports manual installation of a packed extension that is not
+  signed and distributed by the Chrome Web Store.
+- **Local development or a small trusted test group** can continue using
+  **Load unpacked** with the `extension` directory. Each installation may have
+  a different ID and must register the native host with that displayed ID.
+
+See Chrome's official documentation for
+[extension distribution](https://developer.chrome.com/docs/extensions/how-to/distribute),
+[Linux self-hosting and updates](https://developer.chrome.com/docs/extensions/how-to/distribute/host-on-linux),
+and [enterprise `ExtensionSettings`](https://support.google.com/chrome/a/answer/9867568).
+
 ## Use
 
 1. Sign in normally and open an eduonline lesson containing an AccelSite video.

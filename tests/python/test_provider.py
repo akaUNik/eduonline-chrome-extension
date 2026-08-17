@@ -27,7 +27,10 @@ FIXTURES = Path(__file__).parents[1] / "fixtures"
 class ProviderUrlTest(unittest.TestCase):
     def test_accepts_supported_lesson_and_player(self) -> None:
         lesson = "https://school.eduonline.io/learn/ExampleLesson/theory"
-        player = "https://v.accelsite.io/v/ExamplePlayerId123456?showTitle=true&muted=false"
+        player = (
+            "https://v.accelsite.io/v/ExamplePlayerId123456"
+            "?showTitle=true&muted=false&autoplay=true"
+        )
         self.assertEqual(validate_lesson_url(lesson), lesson)
         self.assertEqual(validate_player_url(player).player_id, "ExamplePlayerId123456")
 
