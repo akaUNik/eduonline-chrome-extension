@@ -5,6 +5,42 @@ import vm from "node:vm";
 
 const sourceUrl = new URL("../../extension/content.js", import.meta.url);
 
+test("discovery and popup support every eduonline path and reject unrelated hosts", async () => {
+  const pages = JSON.parse(await readFile(new URL("../fixtures/eduonline_pages.json", import.meta.url), "utf8"));
+  const frames = [{ src: "https://v.accelsite.io/v/ExamplePlayerId123456" }];
+  const context = {
+    URL,
+    document: { title: "Example page", querySelectorAll: () => frames },
+    window: { location: { href: pages.supported[0] } },
+  };
+  vm.runInNewContext(await readFile(sourceUrl, "utf8"), context);
+  const popup = { URL };
+  vm.runInNewContext(await readFile(new URL("../../extension/popup.js", import.meta.url), "utf8"), popup);
+  for (const url of pages.supported) {
+    context.window.location.href = url;
+    assert.equal(popup.EduonlinePopup.supportedLesson(url), true, url);
+    const discovery = context.EduonlineDiscovery.collectDiscovery();
+    assert.equal(discovery.lessonUrl, url);
+    assert.deepEqual([...discovery.candidates], [frames[0].src]);
+  }
+  for (const url of pages.unsupported) {
+    context.window.location.href = url;
+    assert.equal(popup.EduonlinePopup.supportedLesson(url), false, url);
+    assert.equal(context.EduonlineDiscovery.collectDiscovery().lessonUrl, null, url);
+    assert.deepEqual([...context.EduonlineDiscovery.collectDiscovery().candidates], []);
+  }
+  context.window.location.href = pages.supported[4];
+  frames.length = 0;
+  assert.equal(context.EduonlineDiscovery.collectDiscovery().lessonUrl, pages.supported[4]);
+  assert.deepEqual([...context.EduonlineDiscovery.collectDiscovery().candidates], []);
+});
+
+test("content script is installed on every eduonline path without expanding host permissions", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../../extension/manifest.json", import.meta.url), "utf8"));
+  assert.deepEqual(manifest.content_scripts[0].matches, ["*://*.eduonline.io/*"]);
+  assert.deepEqual(manifest.host_permissions, ["*://*.eduonline.io/*"]);
+});
+
 test("content script registers a discovery listener with mocked Chrome APIs", async () => {
   let listener;
   const context = {

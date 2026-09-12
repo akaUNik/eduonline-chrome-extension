@@ -181,7 +181,7 @@ class ProbeServiceTest(unittest.TestCase):
         runner = RecordingRunner()
         cache = ProbeCache()
         result = ProbeService(http_client, runner, cache).probe(
-            "https://school.eduonline.io/learn/ExampleLesson/theory",
+            "https://school.eduonline.io/library/ExampleLibrary/ExampleArticle",
             candidates,
         )
 

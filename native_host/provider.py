@@ -19,7 +19,6 @@ from native_host.errors import ErrorCode, HostError
 OPAQUE_ID_PATTERN = r"[A-Za-z0-9_-]{6,128}"
 PLAYER_PATH_PATTERN = re.compile(rf"^/v/(?P<player_id>{OPAQUE_ID_PATTERN})$")
 MANIFEST_PATH_PATTERN = re.compile(rf"^/(?P<stream_id>{OPAQUE_ID_PATTERN})/master\.m3u8$")
-LESSON_PATH_PATTERN = re.compile(r"^/learn/[^/]+(?:/.*)?$")
 PLAYER_QUERY_KEYS = frozenset({"showTitle", "showControls", "muted", "autoplay"})
 BOOLEAN_VALUES = frozenset({"true", "false"})
 PLAYER_HOST = "v.accelsite.io"
@@ -188,15 +187,13 @@ def _parse_url(url: str, code: ErrorCode, label: str):
 
 
 def validate_lesson_url(url: str) -> str:
-    """Validate an eduonline lesson URL used to bind a probe to a tab."""
+    """Validate an eduonline page URL used to bind a probe to a tab."""
     parsed = _parse_url(url, ErrorCode.UNSUPPORTED_PAGE, "Lesson")
     host = parsed.hostname.lower()
     if parsed.scheme not in {"http", "https"}:
         raise HostError(ErrorCode.UNSUPPORTED_PAGE, "Lesson URL scheme is unsupported.")
     if host != "eduonline.io" and not host.endswith(".eduonline.io"):
-        raise HostError(ErrorCode.UNSUPPORTED_PAGE, "Open an eduonline.io lesson first.")
-    if not LESSON_PATH_PATTERN.fullmatch(parsed.path):
-        raise HostError(ErrorCode.UNSUPPORTED_PAGE, "Open an eduonline.io lesson first.")
+        raise HostError(ErrorCode.UNSUPPORTED_PAGE, "Open an eduonline.io page first.")
     return url
 
 

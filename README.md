@@ -1,8 +1,8 @@
 # eduonline Video Downloader
 
-A Chrome MV3 extension plus a local Python native-messaging host for downloading videos from eduonline lessons that you are authorized to view. It recognizes the observed provider chain:
+A Chrome MV3 extension plus a local Python native-messaging host for downloading videos from eduonline pages that you are authorized to view. All HTTP(S) paths on `eduonline.io` and its subdomains are supported, including lessons, libraries, and other sections. It recognizes the observed provider chain:
 
-`*.eduonline.io/learn/...` → `https://v.accelsite.io/v/<id>` → `https://kinescope.io/<id>/master.m3u8`
+`eduonline.io/*` or `*.eduonline.io/*` → `https://v.accelsite.io/v/<id>` → `https://kinescope.io/<id>/master.m3u8`
 
 The extension discovers every supported embedded player and presents a video selector with per-video metadata and quality choices. The native host performs the constrained `yt-dlp` probe/download and writes the selected result under `~/Downloads`.
 
@@ -140,20 +140,25 @@ and [enterprise `ExtensionSettings`](https://support.google.com/chrome/a/answer/
 
 ## Use
 
-1. Sign in normally and open an eduonline lesson containing an AccelSite video.
-2. Click the extension icon. The popup inspects only the active lesson's rendered iframe URLs.
-3. If the lesson contains multiple videos, select one by title.
+1. Sign in normally and open an eduonline page containing an AccelSite video, such as a lesson or library article.
+2. Click the extension icon. The popup inspects only the active page's rendered iframe URLs.
+3. If the page contains multiple videos, select one by title.
 4. Select **Best**, an explicit resolution, or **Audio only (MP3)** when audio is available.
 5. Click **Download**. The native host keeps running if the popup closes; reopening it restores the latest progress while that host session remains connected.
 6. Find the collision-safe, title-based output in `~/Downloads`.
 
 Use this only for media you are permitted to download. The extension does not bypass DRM or access controls.
 
+After updating an unpacked installation, reload the extension at `chrome://extensions`
+and refresh any already-open eduonline tabs. The registered native host must point
+to this updated checkout; it also validates page URLs. Pages with no supported
+embedded player show a no-video message.
+
 ## Provider limitations
 
 This release intentionally supports only:
 
-- an HTTP(S) eduonline lesson beneath `/learn/`;
+- an HTTP(S) page at any path on `eduonline.io` or its subdomains;
 - an HTTPS iframe at `v.accelsite.io/v/<opaque-id>` with only the observed boolean player query fields;
 - an HTTPS Kinescope manifest at `kinescope.io/<opaque-id>/master.m3u8`;
 - an optional poster at `cdn.app.axl.tech`.

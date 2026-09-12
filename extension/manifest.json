@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "eduonline Video Downloader",
-  "description": "Download an authorized eduonline.io lesson video through a local yt-dlp host.",
+  "description": "Download authorized videos embedded on eduonline.io pages through a local yt-dlp host.",
   "version": "0.1.0",
   "permissions": [
     "nativeMessaging",
@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.eduonline.io/learn/*"
+        "*://*.eduonline.io/*"
       ],
       "js": [
         "content.js"
@@ -25,7 +25,7 @@
     }
   ],
   "action": {
-    "default_title": "Download lesson video",
+    "default_title": "Download page video",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

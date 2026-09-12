@@ -131,7 +131,7 @@ test("background correlates probe results, omits token from storage, and invalid
   const stale = await context.EduonlineBackground.handleClientMessage({
     type: "get-state",
     tabId: 7,
-    lessonUrl: "https://school.eduonline.io/learn/two/theory",
+    lessonUrl: "https://school.eduonline.io/library/ExampleLibrary/ExampleArticle",
     discoveryFingerprint: "2:example",
   });
   assert.equal(stale.phase, "idle");
