@@ -6,7 +6,9 @@ length. Messages are limited to 1 MiB. Requests contain `version`,
 `requestId`, `event`, and either `payload` or a structured `error`.
 
 Supported actions are `ping`, `probe`, `download`, and `status`. A probe accepts
-the active eduonline lesson URL and bounded AccelSite iframe candidates. Its
+the active eduonline page URL and bounded AccelSite iframe candidates. The
+`lessonUrl` field retains its name for compatibility and accepts any HTTP(S)
+path on `eduonline.io` or its subdomains, including `/library/` and `/learn/`. Its
 result contains an ordered `videos` array. Each entry has a stable media ID,
 title, optional poster/duration, selectable formats, and an independent opaque
 probe token. Duplicate player and canonical media identities occur only once;

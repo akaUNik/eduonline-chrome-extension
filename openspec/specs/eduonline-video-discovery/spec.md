@@ -2,51 +2,55 @@
 
 ## Purpose
 
-Detect every downloadable video associated with the active eduonline.io lesson and expose trustworthy per-video metadata and quality choices to the user.
+Detect every downloadable video associated with the active eduonline.io page and expose trustworthy per-video metadata and quality choices to the user.
 
 ## Requirements
 
-### Requirement: Supported lesson recognition
-The extension SHALL activate discovery only for an HTTP(S) page on an `eduonline.io` host whose path represents a lesson under `/learn/`.
+### Requirement: Supported page recognition
+The extension SHALL activate discovery only for an HTTP(S) page on `eduonline.io` or any of its subdomains, regardless of path. This SHALL include `/learn/`, `/library/`, the root path, and other sections; unrelated hosts and non-HTTP(S) schemes SHALL remain unsupported.
 
-#### Scenario: User opens a supported lesson
-- **WHEN** the active tab is an `https://*.eduonline.io/learn/...` lesson page
+#### Scenario: User opens a supported page
+- **WHEN** the active tab is an HTTP(S) page at any path on `eduonline.io` or a subdomain
 - **THEN** the popup begins video discovery for that tab
 
+#### Scenario: User opens a library article
+- **WHEN** the active tab is an `https://*.eduonline.io/library/...` article containing two supported players
+- **THEN** the popup discovers both videos and offers their individual quality choices
+
 #### Scenario: User opens an unrelated page
-- **WHEN** the active tab is not a supported eduonline.io lesson page
+- **WHEN** the active tab is not a supported eduonline.io page
 - **THEN** the popup explains that the page is unsupported and does not offer a download action
 
-### Requirement: Active lesson video discovery
-The extension SHALL collect the active lesson page URL and the rendered lesson's bounded HTTPS player frame URLs, and SHALL ask the native host to resolve every distinct allowlisted `v.accelsite.io/v/...` frame to its AccelPlayer configuration and Kinescope HLS manifest.
+### Requirement: Active page video discovery
+The extension SHALL collect the active page URL and the rendered page's bounded HTTPS player frame URLs, and SHALL ask the native host to resolve every distinct allowlisted `v.accelsite.io/v/...` frame to its AccelPlayer configuration and Kinescope HLS manifest.
 
 #### Scenario: AccelSite player is discoverable
-- **WHEN** the rendered lesson exposes an HTTPS `v.accelsite.io/v/...` frame containing a valid AccelPlayer configuration
-- **THEN** the extension identifies its allowlisted Kinescope HLS manifest as a downloadable video for the active lesson
+- **WHEN** the rendered page exposes an HTTPS `v.accelsite.io/v/...` frame containing a valid AccelPlayer configuration
+- **THEN** the extension identifies its allowlisted Kinescope HLS manifest as a downloadable video for the active page
 
-#### Scenario: Lesson contains multiple supported videos
-- **WHEN** the rendered lesson exposes two or more distinct supported AccelSite players
+#### Scenario: Page contains multiple supported videos
+- **WHEN** the rendered page exposes two or more distinct supported AccelSite players
 - **THEN** the extension returns every successfully resolved video in rendered iframe order
 
-#### Scenario: Lesson repeats the same media
+#### Scenario: Page repeats the same media
 - **WHEN** duplicate iframe URLs or different iframe candidates resolve to the same media identity
 - **THEN** the extension presents that media only once
 
 #### Scenario: One candidate fails while another succeeds
 - **WHEN** at least one supported candidate resolves successfully and another candidate is inaccessible, malformed, protected, or unsupported
-- **THEN** the extension presents the successfully resolved videos without treating the whole lesson as failed
+- **THEN** the extension presents the successfully resolved videos without treating the whole page as failed
 
 #### Scenario: No supported video is discoverable
-- **WHEN** the lesson has no candidate that resolves to a valid supported Kinescope HLS manifest
+- **WHEN** the page has no candidate that resolves to a valid supported Kinescope HLS manifest
 - **THEN** the popup reports that no supported video was found and keeps the download action disabled
 
 #### Scenario: Untrusted player target is present
 - **WHEN** an iframe or parsed media URL uses an unapproved scheme, host, or path shape
 - **THEN** the target is rejected before any media probe or download is started
 
-#### Scenario: Lesson changes without a full page load
-- **WHEN** client-side navigation changes the active eduonline lesson
-- **THEN** reopening or refreshing the popup discovers metadata for the new lesson rather than reusing stale metadata
+#### Scenario: Page changes without a full page load
+- **WHEN** client-side navigation changes the active eduonline page, including a transition between `/learn/` and `/library/`
+- **THEN** reopening or refreshing the popup discovers metadata for the new page rather than reusing stale metadata
 
 ### Requirement: Video metadata presentation
 The popup SHALL show each discovered video's title and SHALL show its poster and duration when those values are present in the validated AccelPlayer configuration, while clearly representing the loading and failure states.
@@ -87,7 +91,7 @@ The popup SHALL derive quality choices independently for each video from formats
 - **THEN** the popup disables download and reports that the video has no supported formats
 
 ### Requirement: Authorized and unprotected media only
-The extension SHALL operate only on a player embedded in the active lesson, SHALL use only fixed non-secret AccelSite origin/referrer headers required by that player, and SHALL report DRM-protected or authorization-denied media as unsupported without attempting cookie extraction or access-control bypass.
+The extension SHALL operate only on a player embedded in the active page, SHALL use only fixed non-secret AccelSite origin/referrer headers required by that player, and SHALL report DRM-protected or authorization-denied media as unsupported without attempting cookie extraction or access-control bypass.
 
 #### Scenario: Protected media is encountered
 - **WHEN** probing indicates DRM protection or an authorization failure with the fixed player headers

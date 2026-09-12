@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 from io import BytesIO
 from pathlib import Path
@@ -25,6 +26,20 @@ FIXTURES = Path(__file__).parents[1] / "fixtures"
 
 
 class ProviderUrlTest(unittest.TestCase):
+    def test_supports_all_eduonline_page_paths_only(self) -> None:
+        pages = json.loads((FIXTURES / "eduonline_pages.json").read_text(encoding="utf-8"))
+        for url in pages["supported"]:
+            with self.subTest(url=url):
+                self.assertEqual(validate_lesson_url(url), url)
+        for url in pages["unsupported"] + [
+            "https://user:password@school.eduonline.io/library/example",
+            "https://school.eduonline.io:444/library/example",
+            "https://school.eduonline.io/library/example#fragment",
+        ]:
+            with self.subTest(url=url), self.assertRaises(HostError) as caught:
+                validate_lesson_url(url)
+            self.assertEqual(caught.exception.code, ErrorCode.UNSUPPORTED_PAGE)
+
     def test_accepts_supported_lesson_and_player(self) -> None:
         lesson = "https://school.eduonline.io/learn/ExampleLesson/theory"
         player = (

@@ -11,7 +11,7 @@ test("popup helpers recognize lessons and order quality choices", async () => {
   vm.runInNewContext(await readFile(sourceUrl, "utf8"), context);
 
   assert.equal(context.EduonlinePopup.supportedLesson("http://school.eduonline.io/learn/id/theory"), true);
-  assert.equal(context.EduonlinePopup.supportedLesson("https://school.eduonline.io/catalog"), false);
+  assert.equal(context.EduonlinePopup.supportedLesson("https://school.eduonline.io/catalog"), true);
   const formats = context.EduonlinePopup.sortFormats([
     { choiceId: "audio-only", audioOnly: true, height: null },
     { choiceId: "video-360", audioOnly: false, height: 360 },

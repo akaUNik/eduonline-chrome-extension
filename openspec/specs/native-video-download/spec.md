@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provide a constrained native-messaging bridge that uses local `yt-dlp` tooling to inspect every supported video on an eduonline lesson and download one user-selected video at a time.
+Provide a constrained native-messaging bridge that uses local `yt-dlp` tooling to inspect every supported video on an eduonline page and download one user-selected video at a time.
 
 ## Requirements
 
@@ -23,6 +23,15 @@ The extension and native host SHALL exchange length-prefixed JSON messages using
 
 ### Requirement: Media probing
 The native host SHALL independently fetch each distinct allowlisted AccelSite player page, extract only the expected AccelPlayer metadata and Kinescope HLS URL without executing page JavaScript, inspect each distinct manifest without downloading media, and return an ordered `videos` array containing normalized metadata and only formats that can be selected safely by a later download request.
+
+#### Scenario: Probe originates from any eduonline section
+- **WHEN** a probe carries an HTTP(S) `lessonUrl` on `eduonline.io` or any subdomain, at any path including `/library/` or the root
+- **THEN** the native host accepts the page URL without a `/learn/` restriction and resolves only the supplied allowlisted players
+- **AND** protocol v2 retains the `lessonUrl` field name for compatibility
+
+#### Scenario: Probe originates outside eduonline
+- **WHEN** the page URL has an unrelated host, an unsupported scheme, credentials, an explicit port, or a fragment
+- **THEN** the native host rejects the page URL before fetching a player or invoking `yt-dlp`
 
 #### Scenario: AccelSite candidate is supported
 - **WHEN** the player configuration contains an allowlisted Kinescope `master.m3u8` that `yt-dlp` can inspect with the fixed AccelSite origin and referrer

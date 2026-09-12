@@ -10,7 +10,6 @@
       if (!['http:', 'https:'].includes(url.protocol)) return null;
       const host = url.hostname.toLowerCase();
       if (host !== 'eduonline.io' && !host.endsWith('.eduonline.io')) return null;
-      if (!url.pathname.startsWith('/learn/')) return null;
       url.hash = '';
       return url.href;
     } catch {

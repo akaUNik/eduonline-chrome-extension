@@ -26,8 +26,7 @@
       const url = new URL(rawUrl);
       const host = url.hostname.toLowerCase();
       return ['http:', 'https:'].includes(url.protocol)
-        && (host === 'eduonline.io' || host.endsWith('.eduonline.io'))
-        && url.pathname.startsWith('/learn/');
+        && (host === 'eduonline.io' || host.endsWith('.eduonline.io'));
     } catch {
       return false;
     }
@@ -175,7 +174,7 @@
     reset();
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id || !supportedLesson(tab.url)) {
-      elements.status.textContent = 'Open an eduonline.io lesson to use this extension.';
+      elements.status.textContent = 'Open an eduonline.io page to use this extension.';
       return;
     }
     let discovery;
@@ -185,7 +184,7 @@
       throw friendlyConnectionError(error);
     }
     if (!discovery?.lessonUrl || !discovery.candidates?.length) {
-      elements.status.textContent = 'No supported AccelSite video was found on this lesson.';
+      elements.status.textContent = 'No supported AccelSite video was found on this page.';
       return;
     }
     active = {

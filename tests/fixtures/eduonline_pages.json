@@ -1,0 +1,21 @@
+{
+  "supported": [
+    "https://eduonline.io/",
+    "http://eduonline.io/",
+    "https://school.eduonline.io/",
+    "https://school.eduonline.io/learn/ExampleLesson/theory",
+    "https://school.eduonline.io/library/ExampleLibrary/ExampleArticle",
+    "https://school.eduonline.io/catalog",
+    "https://school.eduonline.io/other/path?view=video",
+    "https://nested.school.eduonline.io/arbitrary/page"
+  ],
+  "unsupported": [
+    "https://example.com/learn/example",
+    "https://eduonline.io.example.com/library/example",
+    "https://fakeeduonline.io/library/example",
+    "https://eduonline.io@evil.example/library/example",
+    "ftp://school.eduonline.io/library/example",
+    "file:///library/example",
+    "not a URL"
+  ]
+}
