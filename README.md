@@ -160,17 +160,17 @@ This release intentionally supports only:
 
 - an HTTP(S) page at any path on `eduonline.io` or its subdomains;
 - an HTTPS iframe at `v.accelsite.io/v/<opaque-id>` with only the observed boolean player query fields;
-- an HTTPS Kinescope manifest at `kinescope.io/<opaque-id>/master.m3u8`;
+- an HTTPS Kinescope manifest at `kinescope.io/<opaque-id>/master.m3u8`, or a signed AccelSite HLS manifest at `v.accelsite.io/v/hls/<payload>.<signature>/master.m3u8` supplied as an absolute URL or a root-relative path;
 - an optional poster at `cdn.app.axl.tech`.
 
-Kinescope probe/download requests add only these fixed, non-secret headers:
+Manifest probe/download requests add only these fixed, non-secret headers:
 
 ```text
 Origin: https://v.accelsite.io
 Referer: https://v.accelsite.io/
 ```
 
-Other providers, arbitrary URLs, signed manifest queries, cross-host redirects, DRM, and authorization failures are rejected. Browser cookies are never requested or read.
+Other providers, arbitrary URLs, manifest queries, cross-host redirects, DRM, and authorization failures are rejected. Browser cookies are never requested or read. Signed manifest paths stay in native-host memory; the popup receives only a hash-based media identifier.
 
 ## Troubleshooting
 
