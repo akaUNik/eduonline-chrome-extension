@@ -14,6 +14,7 @@ from native_host.provider import (
     MAX_PROVIDER_RESPONSE_BYTES,
     BoundedHttpClient,
     parse_player_html,
+    resolve_manifest_url,
     validate_lesson_url,
     validate_manifest_url,
     validate_player_url,
@@ -23,6 +24,8 @@ from native_host.provider import (
 
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
+SIGNED_PATH = f"/v/hls/ExamplePayload123456.{'a' * 64}/master.m3u8"
+SIGNED_MANIFEST = f"https://v.accelsite.io{SIGNED_PATH}"
 
 
 class ProviderUrlTest(unittest.TestCase):
@@ -55,6 +58,13 @@ class ProviderUrlTest(unittest.TestCase):
         self.assertEqual(validate_manifest_url(manifest).stream_id, "ExampleStreamId123456")
         self.assertEqual(validate_poster_url(poster), poster)
 
+    def test_resolves_signed_accelsite_manifest_without_exposing_signature(self) -> None:
+        resolved = resolve_manifest_url(SIGNED_PATH)
+        self.assertEqual(resolved.url, SIGNED_MANIFEST)
+        self.assertEqual(validate_manifest_url(SIGNED_MANIFEST), resolved)
+        self.assertRegex(resolved.stream_id, r"^[a-f0-9]{32}$")
+        self.assertNotIn("ExamplePayload", resolved.stream_id)
+
     def test_rejects_player_credentials_port_fragment_and_unknown_query(self) -> None:
         invalid = [
             "https://user@v.accelsite.io/v/ExamplePlayerId123456",
@@ -74,10 +84,20 @@ class ProviderUrlTest(unittest.TestCase):
             "https://edge.kinescope.io/ExampleStreamId123456/master.m3u8",
             "https://127.0.0.1/ExampleStreamId123456/master.m3u8",
             "https://kinescope.io/ExampleStreamId123456/master.mpd",
+            f"{SIGNED_MANIFEST}?token=secret",
+            SIGNED_MANIFEST.replace("v.accelsite.io", "evil.example"),
+            SIGNED_MANIFEST.replace("/v/hls/", "/v/other/"),
+            SIGNED_MANIFEST.replace("/master.m3u8", "/master.mpd"),
+            SIGNED_MANIFEST.replace("a" * 64, "not-a-signature"),
         ]
         for url in invalid:
             with self.subTest(url=url), self.assertRaises(HostError) as caught:
                 validate_manifest_url(url)
+            self.assertEqual(caught.exception.code, ErrorCode.INVALID_MANIFEST_URL)
+
+        for raw in ("//evil.example/v/hls/abc", "/v/hls/../master.m3u8", "/v/hls/abc/master.m3u8?x=1"):
+            with self.subTest(raw=raw), self.assertRaises(HostError) as caught:
+                resolve_manifest_url(raw)
             self.assertEqual(caught.exception.code, ErrorCode.INVALID_MANIFEST_URL)
 
     def test_revalidates_redirect_target(self) -> None:
@@ -86,6 +106,9 @@ class ProviderUrlTest(unittest.TestCase):
         self.assertEqual(validate_redirect(source, target), target)
         with self.assertRaises(HostError):
             validate_redirect(source, "https://example.com/v/OtherPlayerId123456")
+        self.assertEqual(validate_redirect(SIGNED_MANIFEST, SIGNED_MANIFEST), SIGNED_MANIFEST)
+        with self.assertRaises(HostError):
+            validate_redirect(SIGNED_MANIFEST, "https://kinescope.io/ExampleStreamId123456/master.m3u8")
 
 
 class PlayerConfigTest(unittest.TestCase):
@@ -109,6 +132,15 @@ class PlayerConfigTest(unittest.TestCase):
             with self.subTest(size=len(source)), self.assertRaises(HostError) as caught:
                 parse_player_html(source)
             self.assertEqual(caught.exception.code, ErrorCode.INVALID_PROVIDER_CONFIG)
+
+    def test_parses_relative_signed_accelsite_manifest(self) -> None:
+        source = f'''<script>new AccelPlayer({{
+          videoId: "ExamplePlayerId123456",
+          url: "{SIGNED_PATH}",
+          title: "Example lesson"
+        }});</script>'''
+        config = parse_player_html(source)
+        self.assertEqual(config.manifest_url, SIGNED_MANIFEST)
 
     def test_rejects_manifest_outside_allowlist(self) -> None:
         source = """
@@ -189,6 +221,12 @@ class ProviderFetchTest(unittest.TestCase):
         self.assertEqual(request.get_header("Referer"), "https://v.accelsite.io/")
         self.assertIsNone(request.get_header("Cookie"))
         self.assertEqual(timeout, 15.0)
+
+    def test_preflight_accepts_signed_accelsite_manifest(self) -> None:
+        opener = _FakeOpener([_FakeResponse(b"#EXTM3U\n")])
+        client = BoundedHttpClient(opener=opener)
+        self.assertEqual(client.preflight_manifest(SIGNED_MANIFEST), "#EXTM3U\n")
+        self.assertEqual(opener.requests[0][0].full_url, SIGNED_MANIFEST)
 
     def test_rejects_cross_host_redirect_and_403(self) -> None:
         redirect_headers = Message()

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import html as html_module
 import re
 import time
@@ -19,6 +20,9 @@ from native_host.errors import ErrorCode, HostError
 OPAQUE_ID_PATTERN = r"[A-Za-z0-9_-]{6,128}"
 PLAYER_PATH_PATTERN = re.compile(rf"^/v/(?P<player_id>{OPAQUE_ID_PATTERN})$")
 MANIFEST_PATH_PATTERN = re.compile(rf"^/(?P<stream_id>{OPAQUE_ID_PATTERN})/master\.m3u8$")
+SIGNED_MANIFEST_PATH_PATTERN = re.compile(
+    r"^/v/hls/(?P<payload>[A-Za-z0-9_-]{16,256})\.(?P<signature>[a-f0-9]{64})/master\.m3u8$"
+)
 PLAYER_QUERY_KEYS = frozenset({"showTitle", "showControls", "muted", "autoplay"})
 BOOLEAN_VALUES = frozenset({"true", "false"})
 PLAYER_HOST = "v.accelsite.io"
@@ -220,16 +224,32 @@ def validate_player_url(url: str) -> ValidatedPlayerUrl:
 
 
 def validate_manifest_url(url: str) -> ValidatedManifestUrl:
-    """Validate the exact Kinescope HLS manifest shape exposed by AccelPlayer."""
+    """Validate the observed Kinescope and signed AccelSite HLS manifests."""
     parsed = _parse_url(url, ErrorCode.INVALID_MANIFEST_URL, "Manifest")
-    if parsed.scheme != "https" or parsed.hostname.lower() != MANIFEST_HOST:
-        raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL is not an approved Kinescope manifest.")
+    if parsed.scheme != "https" or parsed.hostname.lower() not in {MANIFEST_HOST, PLAYER_HOST}:
+        raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL is not an approved provider manifest.")
     if parsed.query:
         raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL must not contain a query.")
-    match = MANIFEST_PATH_PATTERN.fullmatch(parsed.path)
-    if match is None:
-        raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL path is unsupported.")
-    return ValidatedManifestUrl(url=url, stream_id=match.group("stream_id"))
+    if parsed.hostname.lower() == MANIFEST_HOST:
+        match = MANIFEST_PATH_PATTERN.fullmatch(parsed.path)
+        if match is not None:
+            return ValidatedManifestUrl(url=url, stream_id=match.group("stream_id"))
+    else:
+        match = SIGNED_MANIFEST_PATH_PATTERN.fullmatch(parsed.path)
+        if match is not None:
+            # Never expose the signed path in popup state or output filenames.
+            media_id = hashlib.sha256(parsed.path.encode("ascii")).hexdigest()[:32]
+            return ValidatedManifestUrl(url=url, stream_id=media_id)
+    raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL path is unsupported.")
+
+
+def resolve_manifest_url(raw_url: str) -> ValidatedManifestUrl:
+    """Resolve only the observed root-relative signed HLS path."""
+    if raw_url.startswith("/") and not raw_url.startswith("//"):
+        if SIGNED_MANIFEST_PATH_PATTERN.fullmatch(raw_url) is None:
+            raise HostError(ErrorCode.INVALID_MANIFEST_URL, "Manifest URL path is unsupported.")
+        raw_url = PLAYER_ORIGIN + raw_url
+    return validate_manifest_url(raw_url)
 
 
 def validate_poster_url(url: str) -> str:
@@ -244,15 +264,17 @@ def validate_poster_url(url: str) -> str:
 
 def validate_redirect(source_url: str, target_url: str) -> str:
     """Revalidate a redirect without allowing a provider boundary change."""
-    source_host = urlsplit(source_url).hostname
-    target_host = urlsplit(target_url).hostname
-    if source_host == PLAYER_HOST:
+    source = urlsplit(source_url)
+    source_host = source.hostname
+    if source_host == PLAYER_HOST and PLAYER_PATH_PATTERN.fullmatch(source.path):
+        validate_player_url(source_url)
         validated = validate_player_url(target_url).url
-    elif source_host == MANIFEST_HOST:
+    elif source_host in {MANIFEST_HOST, PLAYER_HOST}:
+        validate_manifest_url(source_url)
         validated = validate_manifest_url(target_url).url
     else:
         raise HostError(ErrorCode.NETWORK_ERROR, "Redirect source is unsupported.")
-    if target_host != source_host:
+    if urlsplit(validated).hostname != source_host:
         raise HostError(ErrorCode.NETWORK_ERROR, "Cross-host redirects are not allowed.")
     return validated
 
@@ -271,7 +293,7 @@ def parse_player_html(source: str) -> PlayerConfig:
         raise HostError(ErrorCode.INVALID_PROVIDER_CONFIG, "AccelPlayer video identifier is invalid.")
 
     manifest_raw = _extract_js_string(config_source, "url", required=True, maximum=2048)
-    manifest_url = validate_manifest_url(manifest_raw or "").url
+    manifest_url = resolve_manifest_url(manifest_raw or "").url
     title = _extract_js_string(config_source, "title", required=False, maximum=300)
     poster_raw = _extract_js_string(config_source, "poster", required=False, maximum=2048)
     poster = validate_poster_url(poster_raw) if poster_raw else None
